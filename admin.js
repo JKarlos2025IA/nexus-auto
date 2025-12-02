@@ -109,7 +109,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         const btn = salesForm.querySelector('button[type="submit"]');
         const originalText = "REGISTRAR VENTA";
-        const originalColor = btn.style.backgroundColor;
+
+        // Prevent double submission
+        if (btn.disabled) return;
 
         btn.textContent = 'Guardando...';
         btn.disabled = true;
@@ -128,24 +130,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             await addDoc(salesCollection, newSale);
 
-            // Success Actions
+            // --- Success State ---
+
+            // 1. Clear Form
             salesForm.reset();
-            document.getElementById('fecha').valueAsDate = new Date();
 
-            // Visual Feedback
+            // 2. Reset Date to Today
+            const dateInput = document.getElementById('fecha');
+            if (dateInput) dateInput.valueAsDate = new Date();
+
+            // 3. Visual Feedback (Green Button)
             btn.textContent = '¡GUARDADO!';
-            btn.style.backgroundColor = '#28a745'; // Green color
+            btn.style.backgroundColor = '#28a745';
+            btn.style.color = 'white';
+            btn.style.borderColor = '#28a745';
 
-            // Reset button after 2 seconds
+            // 4. Revert Button after 2 seconds
             setTimeout(() => {
                 btn.textContent = originalText;
-                btn.style.backgroundColor = originalColor;
+                btn.style.backgroundColor = ''; // Revert to CSS
+                btn.style.color = '';
+                btn.style.borderColor = '';
                 btn.disabled = false;
             }, 2000);
 
         } catch (error) {
             console.error("Error adding document: ", error);
             alert("Error al guardar: " + error.message);
+
+            // Revert immediately on error
             btn.textContent = originalText;
             btn.disabled = false;
         }
