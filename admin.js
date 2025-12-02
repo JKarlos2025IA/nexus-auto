@@ -1,4 +1,5 @@
 // Admin Panel Logic with Firebase
+console.log("Nexus Auto Admin v2.0 Loaded");
 
 // Firebase Config
 const firebaseConfig = {
