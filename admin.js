@@ -108,7 +108,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     salesForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = salesForm.querySelector('button[type="submit"]');
-        const originalText = btn.textContent;
+        const originalText = "REGISTRAR VENTA";
+        const originalColor = btn.style.backgroundColor;
+
         btn.textContent = 'Guardando...';
         btn.disabled = true;
 
@@ -126,13 +128,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             await addDoc(salesCollection, newSale);
 
-            alert('Venta registrada exitosamente en la nube');
+            // Success Actions
             salesForm.reset();
             document.getElementById('fecha').valueAsDate = new Date();
+
+            // Visual Feedback
+            btn.textContent = '¡GUARDADO!';
+            btn.style.backgroundColor = '#28a745'; // Green color
+
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.backgroundColor = originalColor;
+                btn.disabled = false;
+            }, 2000);
+
         } catch (error) {
             console.error("Error adding document: ", error);
             alert("Error al guardar: " + error.message);
-        } finally {
             btn.textContent = originalText;
             btn.disabled = false;
         }
