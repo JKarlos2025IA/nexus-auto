@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexus Auto | Administración</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        /* Admin Specific Styles */
+        .admin-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-primary);
+        }
+
+        .admin-header {
+            background-color: var(--color-dark);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Login View */
+        #login-view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%), url('/hero-bg.png') no-repeat center center/cover;
+        }
+
+        .login-card {
+            background-color: rgba(26, 26, 26, 0.95);
+            padding: 3rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-card h2 {
+            margin-bottom: 2rem;
+            color: var(--color-accent);
+        }
+
+        /* Dashboard View */
+        #dashboard-view {
+            display: none;
+        }
+
+        .dashboard-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            color: var(--color-accent);
+            border-bottom-color: var(--color-accent);
+        }
+
+        .dashboard-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Form Styles */
+        .sales-form {
+            background-color: var(--color-dark);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--color-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: white;
+            font-family: var(--font-body);
+            appearance: none;
+            /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007BFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem top 50%;
+            background-size: 0.65rem auto;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--color-dark);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--color-text);
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: var(--color-accent);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-yape {
+            background-color: #740074;
+            color: white;
+        }
+
+        .status-plin {
+            background-color: #00A1E0;
+            color: white;
+        }
+
+        .status-efectivo {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-transferencia {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .status-otros {
+            background-color: #ffc107;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Login View -->
+    <div id="login-view">
+        <div class="login-card">
+            <div class="logo" style="margin-bottom: 1.5rem;">
+                <span class="logo-text" style="font-size: 2rem;">NEXUS<span class="text-accent">AUTO</span></span>
+            </div>
+            <h2>Acceso Administrativo</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="password" id="admin-password" placeholder="Ingrese Clave de Acceso" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">INGRESAR</button>
+                <p id="login-error" style="color: #ff4444; margin-top: 1rem; display: none;">Clave incorrecta</p>
+            </form>
+            <div style="margin-top: 2rem;">
+                <a href="index.html" class="btn btn-outline" style="font-size: 0.8rem;">Volver al Inicio</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view">
+        <header class="admin-header">
+            <div class="logo">
+                <span class="logo-text">NEXUS<span class="text-accent">ADMIN</span></span>
+            </div>
+            <button id="logout-btn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                <i class="ph ph-sign-out"></i> Cerrar Sesión
+            </button>
+        </header>
+
+        <div class="admin-content">
+            <div class="dashboard-tabs">
+                <button class="tab-btn active" data-tab="new-sale">Registrar Venta</button>
+                <button class="tab-btn" data-tab="history">Historial de Ventas</button>
+            </div>
+
+            <!-- New Sale Section -->
+            <div id="new-sale" class="dashboard-section active">
+                <h2 class="section-title" style="font-size: 1.8rem; margin-bottom: 2rem;">Nueva Venta</h2>
+                <form id="sales-form" class="sales-form">
+                    <div class="form-grid">
+                        <!-- Fecha -->
+                        <div class="form-group">
+                            <label for="fecha">Fecha</label>
+                            <input type="date" id="fecha" required>
+                        </div>
+
+                        <!-- Placa -->
+                        <div class="form-group">
+                            <label for="placa">Placa</label>
+                            <input type="text" id="placa" placeholder="ABC-123" style="text-transform: uppercase;"
+                                required>
+                        </div>
+
+                        <!-- Tipo Vehículo -->
+                        <div class="form-group">
+                            <label for="tipo">Tipo de Vehículo</label>
+                            <select id="tipo" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="auto">Auto</option>
+                                <option value="camioneta">Camioneta</option>
+                                <option value="moto">Moto</option>
+                                <option value="torito">Torito</option>
+                                <option value="combi">Combi</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+
+                        <!-- Color -->
+                        <div class="form-group">
+                            <label for="color">Color</label>
+                            <input type="text" id="color" placeholder="Ej. Rojo, Negro..." required>
+                        </div>
+
+                        <!-- Tipo Servicio -->
+                        <div class="form-group">
+                            <label for="servicio">Tipo de Servicio</label>
+                            <select id="servicio" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="lavado simple">Lavado Simple</option>
+                                <option value="lavado complejo">Lavado Complejo</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="form-group">
+                            <label for="precio">Precio (S/)</label>
+                            <input type="number" id="precio" placeholder="0.00" step="0.50" min="0" required>
+                        </div>
+
+                        <!-- Pago -->
+                        <div class="form-group">
+                            <label for="pago">Método de Pago</label>
+                            <select id="pago" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="yape">Yape</option>
+                                <option value="plin">Plin</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem; text-align: right;">
+                        <button type="submit" class="btn btn-primary">REGISTRAR VENTA</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- History Section -->
+            <div id="history" class="dashboard-section">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2 class="section-title" style="font-size: 1.8rem; margin-bottom: 0;">Historial</h2>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="copyForWhatsApp()" class="btn btn-outline"
+                            style="padding: 0.5rem 1rem; font-size: 0.9rem; border-color: #25D366; color: #25D366;">
+                            <i class="ph ph-whatsapp-logo"></i> Reporte WhatsApp
+                        </button>
+                        <button onclick="exportToCSV()" class="btn btn-outline"
+                            style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <i class="ph ph-download-simple"></i> Exportar CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats"
+                    style="color: var(--color-accent); font-weight: bold; margin-bottom: 1rem; text-align: right;">
+                    Total Ventas: <span id="total-sales-count">0</span> | Ingresos: S/ <span
+                        id="total-revenue">0.00</span>
+                </div>
+
+                <div class="table-container">
+                    <table id="sales-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Placa</th>
+                                <th>Vehículo</th>
+                                <th>Color</th>
+                                <th>Servicio</th>
+                                <th>Pago</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by JS -->
+                        </tbody>
+                    </table>
+                    <div id="no-data-message"
+                        style="text-align: center; padding: 2rem; color: var(--color-text-muted); display: none;">
+                        No hay ventas registradas aún.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Expose to window for admin.js
+        window.firebaseModules = {
+            initializeApp,
+            getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot,
+            getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+        };
+    </script>
+    <script src="admin.js" type="module"></script>
+</body>
+
+</html>
