@@ -358,6 +358,60 @@
                     </div>
                 </div>
 
+                <!-- Filters -->
+                <div class="filters-container"
+                    style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                    <h3
+                        style="font-size: 1rem; color: var(--color-text-muted); margin-bottom: 1rem; text-transform: uppercase;">
+                        Filtros de Búsqueda</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; align-items: end;">
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Desde</label>
+                            <input type="date" id="filter-date-start" style="padding: 0.5rem;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Hasta</label>
+                            <input type="date" id="filter-date-end" style="padding: 0.5rem;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Placa</label>
+                            <input type="text" id="filter-placa" placeholder="Buscar placa..."
+                                style="padding: 0.5rem; text-transform: uppercase;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Vehículo</label>
+                            <select id="filter-tipo" style="padding: 0.5rem;">
+                                <option value="">Todos</option>
+                                <option value="auto">Auto</option>
+                                <option value="camioneta">Camioneta</option>
+                                <option value="moto">Moto</option>
+                                <option value="torito">Torito</option>
+                                <option value="combi">Combi</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.8rem;">Pago</label>
+                            <select id="filter-pago" style="padding: 0.5rem;">
+                                <option value="">Todos</option>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="yape">Yape</option>
+                                <option value="plin">Plin</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button id="btn-apply-filters" class="btn btn-primary"
+                                style="padding: 0.5rem 1rem; font-size: 0.9rem; flex: 1;">FILTRAR</button>
+                            <button id="btn-clear-filters" class="btn btn-outline"
+                                style="padding: 0.5rem 1rem; font-size: 0.9rem;">LIMPIAR</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="stats"
                     style="color: var(--color-accent); font-weight: bold; margin-bottom: 1rem; text-align: right;">
                     Total Ventas: <span id="total-sales-count">0</span> | Ingresos: S/ <span

@@ -151,6 +151,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    let allSales = []; // Store ALL data from cloud
+
     function subscribeToSales() {
         const q = query(salesCollection, orderBy("timestamp", "desc"));
 
@@ -159,12 +161,62 @@ document.addEventListener('DOMContentLoaded', async () => {
             snapshot.forEach((doc) => {
                 sales.push({ id: doc.id, ...doc.data() });
             });
-            currentSales = sales;
-            renderTable(sales);
-            updateStats(sales);
+            allSales = sales;
+            applyFilters(); // Apply filters to new data
         }, (error) => {
             console.error("Error getting documents: ", error);
         });
+    }
+
+    // --- Filtering Logic ---
+
+    const btnApplyFilters = document.getElementById('btn-apply-filters');
+    const btnClearFilters = document.getElementById('btn-clear-filters');
+
+    if (btnApplyFilters) {
+        btnApplyFilters.addEventListener('click', applyFilters);
+    }
+
+    if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', clearFilters);
+    }
+
+    function applyFilters() {
+        const dateStart = document.getElementById('filter-date-start').value;
+        const dateEnd = document.getElementById('filter-date-end').value;
+        const placa = document.getElementById('filter-placa').value.toUpperCase();
+        const tipo = document.getElementById('filter-tipo').value;
+        const pago = document.getElementById('filter-pago').value;
+
+        currentSales = allSales.filter(sale => {
+            let match = true;
+
+            // Date Range
+            if (dateStart && sale.fecha < dateStart) match = false;
+            if (dateEnd && sale.fecha > dateEnd) match = false;
+
+            // Placa (Partial Match)
+            if (placa && !sale.placa.includes(placa)) match = false;
+
+            // Exact Matches
+            if (tipo && sale.tipo !== tipo) match = false;
+            if (pago && sale.pago !== pago) match = false;
+
+            return match;
+        });
+
+        renderTable(currentSales);
+        updateStats(currentSales);
+    }
+
+    function clearFilters() {
+        document.getElementById('filter-date-start').value = '';
+        document.getElementById('filter-date-end').value = '';
+        document.getElementById('filter-placa').value = '';
+        document.getElementById('filter-tipo').value = '';
+        document.getElementById('filter-pago').value = '';
+
+        applyFilters(); // Reset to show all
     }
 
     function renderTable(sales) {
