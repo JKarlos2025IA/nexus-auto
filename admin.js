@@ -163,16 +163,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     function subscribeToSales() {
+        console.log("📡 Iniciando suscripción a ventas...");
         const q = query(salesCollection, orderBy("timestamp", "desc"));
         onSnapshot(q, (snapshot) => {
+            console.log("📥 Datos recibidos de Firebase. Total documentos:", snapshot.size);
             const sales = [];
             snapshot.forEach((doc) => {
-                sales.push({ id: doc.id, ...doc.data() });
+                const saleData = { id: doc.id, ...doc.data() };
+                console.log("📄 Documento:", saleData);
+                sales.push(saleData);
             });
             allSales = sales;
+            console.log("✅ Total ventas cargadas:", allSales.length);
             applyFilters();
         }, (error) => {
-            console.error("Error getting documents: ", error);
+            console.error("❌ Error al obtener documentos:", error);
+            console.error("Código de error:", error.code);
+            console.error("Mensaje:", error.message);
+            alert("Error al cargar datos: " + error.message);
         });
     }
 
