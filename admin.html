@@ -237,10 +237,19 @@
             <h2>Acceso Administrativo</h2>
             <form id="login-form">
                 <div class="form-group">
-                    <input type="password" id="admin-password" placeholder="Ingrese Clave de Acceso" required>
+                    <input type="email" id="admin-email" placeholder="Correo Electrónico" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="admin-password" placeholder="Contraseña" required
+                        autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">INGRESAR</button>
-                <p id="login-error" style="color: #ff4444; margin-top: 1rem; display: none;">Clave incorrecta</p>
+                <p id="login-error" style="color: #ff4444; margin-top: 1rem; display: none;"></p>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="#" id="forgot-password-link"
+                        style="color: var(--color-accent); font-size: 0.9rem; text-decoration: none;">¿Olvidaste tu
+                        contraseña?</a>
+                </div>
             </form>
             <div style="margin-top: 2rem;">
                 <a href="index.html" class="btn btn-outline" style="font-size: 0.8rem;">Volver al Inicio</a>
@@ -451,16 +460,16 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // Expose to window for admin.js
         window.firebaseModules = {
             initializeApp,
             getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot,
-            getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+            getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut
         };
     </script>
-    <script src="admin.js?v=2.4" type="module"></script>
+    <script src="admin.js?v=3.0" type="module"></script>
 </body>
 
 </html>

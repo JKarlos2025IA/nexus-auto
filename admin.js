@@ -1,5 +1,5 @@
 // Admin Panel Logic with Firebase
-console.log("Nexus Auto Admin v2.1 Loaded");
+console.log("Nexus Auto Admin v3.0 Loaded - Firebase Auth Enabled");
 
 // Firebase Config
 const firebaseConfig = {
@@ -17,11 +17,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         await new Promise(resolve => setTimeout(resolve, 50));
     }
 
-    const { initializeApp, getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } = window.firebaseModules;
+    const { initializeApp, getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot, getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } = window.firebaseModules;
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
     const salesCollection = collection(db, 'ventas');
 
     // DOM Elements
@@ -45,12 +46,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Authentication ---
     function checkAuth() {
-        const isAuth = localStorage.getItem('nexus_admin_auth') === 'true';
-        if (isAuth) {
-            showDashboard();
-        } else {
-            showLogin();
-        }
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("User logged in:", user.email);
+                showDashboard();
+            } else {
+                console.log("No user logged in");
+                showLogin();
+            }
+        });
     }
 
     function showLogin() {
@@ -64,23 +68,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         subscribeToSales();
     }
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const email = document.getElementById('admin-email').value;
         const password = document.getElementById('admin-password').value;
+        const errorMsg = document.getElementById('login-error');
 
-        if (password === 'admin123' || password === 'nexus2025') {
-            localStorage.setItem('nexus_admin_auth', 'true');
-            loginError.style.display = 'none';
-            showDashboard();
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            errorMsg.style.display = 'none';
             loginForm.reset();
-        } else {
-            loginError.style.display = 'block';
+            // showDashboard() will be called by onAuthStateChanged
+        } catch (error) {
+            console.error("Login error:", error);
+            let message = "Error al iniciar sesión";
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                message = "Correo o contraseña incorrectos";
+            } else if (error.code === 'auth/too-many-requests') {
+                message = "Demasiados intentos. Intenta más tarde";
+            } else if (error.code === 'auth/invalid-email') {
+                message = "Correo electrónico inválido";
+            }
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
         }
     });
 
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('nexus_admin_auth');
-        showLogin();
+    // Forgot password handler
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('admin-email').value;
+
+            if (!email) {
+                alert("Por favor ingresa tu correo electrónico primero");
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Se ha enviado un enlace de recuperación a tu correo");
+            } catch (error) {
+                console.error("Password reset error:", error);
+                if (error.code === 'auth/user-not-found') {
+                    alert("No existe una cuenta con ese correo");
+                } else {
+                    alert("Error al enviar el correo de recuperación");
+                }
+            }
+        });
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            // showLogin() will be called by onAuthStateChanged
+        } catch (error) {
+            console.error("Logout error:", error);
+            alert("Error al cerrar sesión");
+        }
     });
 
     // --- Navigation ---
