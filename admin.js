@@ -1,5 +1,5 @@
 // Admin Panel Logic with Firebase
-console.log("Nexus Auto Admin v2.0 Loaded");
+console.log("Nexus Auto Admin v2.1 Loaded");
 
 // Firebase Config
 const firebaseConfig = {
@@ -13,8 +13,6 @@ const firebaseConfig = {
 
 // Wait for modules to be loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    // Wait a bit for the module script in HTML to run and populate window.firebaseModules
-    // In a real build system this would be imported directly, but here we are bridging.
     while (!window.firebaseModules) {
         await new Promise(resolve => setTimeout(resolve, 50));
     }
@@ -41,13 +39,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sections = document.querySelectorAll('.dashboard-section');
     const dateInput = document.getElementById('fecha');
 
-    // Set default date to today
     if (dateInput) {
         dateInput.valueAsDate = new Date();
     }
 
-    // --- Authentication (Simple Local for now, Data in Cloud) ---
-
+    // --- Authentication ---
     function checkAuth() {
         const isAuth = localStorage.getItem('nexus_admin_auth') === 'true';
         if (isAuth) {
@@ -65,14 +61,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showDashboard() {
         loginView.style.display = 'none';
         dashboardView.style.display = 'block';
-        subscribeToSales(); // Real-time listener
+        subscribeToSales();
     }
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const password = document.getElementById('admin-password').value;
 
-        // Hardcoded password for demonstration
         if (password === 'admin123' || password === 'nexus2025') {
             localStorage.setItem('nexus_admin_auth', 'true');
             loginError.style.display = 'none';
@@ -89,33 +84,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- Navigation ---
-
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             tabBtns.forEach(b => b.classList.remove('active'));
             sections.forEach(s => s.classList.remove('active'));
-
             btn.classList.add('active');
             const tabId = btn.getAttribute('data-tab');
-
             document.getElementById(tabId).classList.add('active');
         });
     });
 
-    // --- Sales Logic (Firestore) ---
-
-    let currentSales = []; // Store for export
+    // --- Sales Logic ---
+    let currentSales = [];
+    let allSales = [];
 
     salesForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = salesForm.querySelector('button[type="submit"]');
         const originalText = "REGISTRAR VENTA";
 
-        // Prevent double submission
         if (btn.disabled) return;
 
+        console.log("🔵 Iniciando guardado...");
         btn.textContent = 'Guardando...';
         btn.disabled = true;
+
+        // Safety timeout
+        const safetyTimeout = setTimeout(() => {
+            console.log("⚠️ Timeout - reseteando botón");
+            btn.textContent = originalText;
+            btn.disabled = false;
+            alert("La operación tardó demasiado. El registro se guardó pero intenta recargar la página.");
+        }, 10000);
 
         try {
             const newSale = {
@@ -129,61 +129,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                 timestamp: new Date().toISOString()
             };
 
-            await addDoc(salesCollection, newSale);
+            console.log("🔵 Enviando a Firebase...", newSale);
+            const docRef = await addDoc(salesCollection, newSale);
+            console.log("✅ Guardado exitoso! ID:", docRef.id);
 
-            // --- Success State ---
+            clearTimeout(safetyTimeout);
 
-            // 1. Clear Form
             salesForm.reset();
-
-            // 2. Reset Date to Today
             const dateInput = document.getElementById('fecha');
             if (dateInput) dateInput.valueAsDate = new Date();
 
-            // 3. Visual Feedback (Green Button)
             btn.textContent = '¡GUARDADO!';
             btn.style.backgroundColor = '#28a745';
             btn.style.color = 'white';
             btn.style.borderColor = '#28a745';
 
-            // 4. Revert Button after 2 seconds
             setTimeout(() => {
                 btn.textContent = originalText;
-                btn.style.backgroundColor = ''; // Revert to CSS
+                btn.style.backgroundColor = '';
                 btn.style.color = '';
                 btn.style.borderColor = '';
                 btn.disabled = false;
-            }, 2000);
+                console.log("🔵 Botón reseteado");
+            }, 1500);
 
         } catch (error) {
-            console.error("Error adding document: ", error);
+            clearTimeout(safetyTimeout);
+            console.error("❌ Error:", error);
             alert("Error al guardar: " + error.message);
-
-            // Revert immediately on error
             btn.textContent = originalText;
             btn.disabled = false;
         }
     });
 
-    let allSales = []; // Store ALL data from cloud
-
     function subscribeToSales() {
         const q = query(salesCollection, orderBy("timestamp", "desc"));
-
         onSnapshot(q, (snapshot) => {
             const sales = [];
             snapshot.forEach((doc) => {
                 sales.push({ id: doc.id, ...doc.data() });
             });
             allSales = sales;
-            applyFilters(); // Apply filters to new data
+            applyFilters();
         }, (error) => {
             console.error("Error getting documents: ", error);
         });
     }
 
-    // --- Filtering Logic ---
-
+    // --- Filtering ---
     const btnApplyFilters = document.getElementById('btn-apply-filters');
     const btnClearFilters = document.getElementById('btn-clear-filters');
 
@@ -204,18 +197,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentSales = allSales.filter(sale => {
             let match = true;
-
-            // Date Range
             if (dateStart && sale.fecha < dateStart) match = false;
             if (dateEnd && sale.fecha > dateEnd) match = false;
-
-            // Placa (Partial Match)
             if (placa && !sale.placa.includes(placa)) match = false;
-
-            // Exact Matches
             if (tipo && sale.tipo !== tipo) match = false;
             if (pago && sale.pago !== pago) match = false;
-
             return match;
         });
 
@@ -229,8 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('filter-placa').value = '';
         document.getElementById('filter-tipo').value = '';
         document.getElementById('filter-pago').value = '';
-
-        applyFilters(); // Reset to show all
+        applyFilters();
     }
 
     function renderTable(sales) {
@@ -286,7 +271,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Export Functions ---
-
     window.exportToCSV = function () {
         if (currentSales.length === 0) {
             alert("No hay datos para exportar.");
@@ -347,6 +331,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Initialize
     checkAuth();
 });
