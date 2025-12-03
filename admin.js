@@ -8,7 +8,7 @@ const firebaseConfig = {
     projectId: "nexus-auto-admin-v1",
     storageBucket: "nexus-auto-admin-v1.firebasestorage.app",
     messagingSenderId: "576411907390",
-    appId: "1:576411907390:web:a57ddffac5c599d4fae86f"
+    appId: "1:576411907390:web:6f56bc2996996486fae86f"
 };
 
 // Wait for modules to be loaded
